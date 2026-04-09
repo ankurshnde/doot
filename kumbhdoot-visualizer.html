@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Agentic Kumbh — KumbhDoot & Doot Visualizer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0b1030;
+    --ink-2: #141a45;
+    --ink-3: #1c2359;
+    --paper: #f6f1e4;
+    --paper-2: #efe7d2;
+    --gold: #d4a84b;
+    --gold-bright: #f2c45a;
+    --saffron: #e07a2c;
+    --vermilion: #b22222;
+    --leaf: #2c5f4f;
+    --rule: rgba(246,241,228,0.14);
+    --rule-strong: rgba(246,241,228,0.28);
+    --muted: rgba(246,241,228,0.62);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Instrument Sans', sans-serif;
+    background: var(--ink);
+    color: var(--paper);
+    line-height: 1.55;
+    font-size: 16px;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(ellipse at 20% 0%, rgba(212,168,75,0.08), transparent 45%),
+      radial-gradient(ellipse at 90% 30%, rgba(178,34,34,0.06), transparent 40%),
+      radial-gradient(ellipse at 50% 90%, rgba(44,95,79,0.08), transparent 50%);
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.035 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1;
+    mix-blend-mode: overlay;
+  }
+
+  .serif { font-family: 'Cormorant Garamond', serif; font-weight: 500; letter-spacing: -0.01em; }
+  .mono { font-family: 'JetBrains Mono', monospace; font-size: 0.78em; letter-spacing: 0.02em; }
+
+  /* ---------- NAV ---------- */
+  nav.top {
+    position: sticky; top: 0; z-index: 50;
+    backdrop-filter: blur(14px);
+    background: rgba(11,16,48,0.78);
+    border-bottom: 1px solid var(--rule);
+  }
+  nav.top .inner {
+    max-width: 1400px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 32px;
+    gap: 24px;
+  }
+  nav.top .brand {
+    display: flex; align-items: center; gap: 12px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px; font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+  nav.top .brand .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 20px var(--gold);
+  }
+  nav.top ul {
+    display: flex; list-style: none; gap: 28px;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+  nav.top a {
+    color: var(--muted); text-decoration: none;
+    transition: color 0.2s;
+    padding: 6px 0;
+    border-bottom: 1px solid transparent;
+  }
+  nav.top a:hover { color: var(--gold); border-bottom-color: var(--gold); }
+
+  /* ---------- HERO ---------- */
+  .hero {
+    position: relative;
+    padding: 120px 32px 100px;
+    max-width: 1400px; margin: 0 auto;
+    z-index: 2;
+  }
+  .hero .meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 28px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .hero .meta::before {
+    content: ''; width: 40px; height: 1px; background: var(--gold);
+  }
+  .hero h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(56px, 10vw, 148px);
+    font-weight: 500;
+    line-height: 0.92;
+    letter-spacing: -0.035em;
+    margin-bottom: 32px;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--gold);
+    font-weight: 400;
+  }
+  .hero .lede {
+    max-width: 680px;
+    font-size: 19px;
+    line-height: 1.55;
+    color: rgba(246,241,228,0.82);
+  }
+  .hero .stats {
+    margin-top: 80px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--rule-strong);
+  }
+  .hero .stats > div {
+    padding: 28px 24px 0 0;
+    border-right: 1px solid var(--rule);
+  }
+  .hero .stats > div:last-child { border-right: none; }
+  .hero .stats .n {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 56px;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--gold);
+  }
+  .hero .stats .l {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 12px;
+  }
+
+  /* ---------- SECTIONS ---------- */
+  section.block {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 100px 32px;
+    position: relative;
+    z-index: 2;
+  }
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .section-label::before {
+    content: ''; width: 24px; height: 1px; background: var(--gold);
+  }
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(40px, 6vw, 72px);
+    font-weight: 500;
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+    margin-bottom: 24px;
+    max-width: 900px;
+  }
+  .section-title em { font-style: italic; color: var(--gold); font-weight: 400; }
+  .section-intro {
+    max-width: 700px;
+    font-size: 17px;
+    color: rgba(246,241,228,0.78);
+    margin-bottom: 60px;
+  }
+
+  /* ---------- RINGS DIAGRAM ---------- */
+  .rings-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+  }
+  .rings-svg-wrap {
+    aspect-ratio: 1 / 1;
+    max-width: 560px;
+    width: 100%;
+  }
+  .rings-svg { width: 100%; height: 100%; }
+  .ring-circle {
+    fill: transparent;
+    stroke: var(--rule-strong);
+    stroke-width: 1.5;
+    transition: all 0.4s cubic-bezier(.2,.7,.2,1);
+    cursor: pointer;
+  }
+  .ring-circle.active {
+    stroke: var(--gold);
+    stroke-width: 2.5;
+    filter: drop-shadow(0 0 22px rgba(212,168,75,0.45));
+  }
+  .ring-fill {
+    fill: rgba(212,168,75,0.04);
+    pointer-events: none;
+    transition: fill 0.4s;
+  }
+  .ring-fill.active { fill: rgba(212,168,75,0.12); }
+  .ring-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    fill: var(--paper);
+    pointer-events: none;
+  }
+  .ring-detail {
+    border-left: 2px solid var(--gold);
+    padding: 8px 0 8px 28px;
+  }
+  .ring-detail .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+  }
+  .ring-detail h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 44px;
+    font-weight: 500;
+    line-height: 1;
+    margin-bottom: 20px;
+  }
+  .ring-detail p {
+    font-size: 16px;
+    color: rgba(246,241,228,0.78);
+    margin-bottom: 18px;
+  }
+  .ring-detail .chips {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-top: 20px;
+  }
+  .ring-detail .chip {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    padding: 6px 10px;
+    border: 1px solid var(--rule-strong);
+    border-radius: 2px;
+    text-transform: uppercase;
+    color: var(--paper);
+  }
+  .ring-detail .chip.out {
+    color: var(--muted);
+    border-style: dashed;
+  }
+
+  /* ---------- PRINCIPLES GRID ---------- */
+  .principles {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--rule-strong);
+    border-left: 1px solid var(--rule-strong);
+  }
+  .principle {
+    padding: 40px 32px 48px;
+    border-right: 1px solid var(--rule-strong);
+    border-bottom: 1px solid var(--rule-strong);
+    position: relative;
+    transition: background 0.3s;
+  }
+  .principle:hover { background: rgba(212,168,75,0.03); }
+  .principle .num {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 80px;
+    line-height: 1;
+    color: var(--gold);
+    position: absolute;
+    top: 30px; right: 32px;
+    opacity: 0.5;
+  }
+  .principle h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 34px;
+    font-weight: 500;
+    line-height: 1.05;
+    margin-bottom: 16px;
+    max-width: 78%;
+  }
+  .principle .role {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 20px;
+  }
+  .principle p {
+    font-size: 15px;
+    color: rgba(246,241,228,0.78);
+    margin-top: 20px;
+  }
+
+  /* ---------- ARCHITECTURE LAYERS ---------- */
+  .arch {
+    margin-top: 40px;
+    border: 1px solid var(--rule-strong);
+    background: linear-gradient(180deg, rgba(20,26,69,0.4), rgba(11,16,48,0.2));
+  }
+  .layer {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    border-bottom: 1px solid var(--rule);
+    padding: 28px 32px;
+    gap: 32px;
+    align-items: start;
+    transition: background 0.3s;
+    position: relative;
+  }
+  .layer:hover { background: rgba(212,168,75,0.04); }
+  .layer:last-child { border-bottom: none; }
+  .layer .lnum {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+  .layer .lname {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 500;
+    margin-top: 6px;
+    line-height: 1.1;
+  }
+  .layer .ldesc {
+    font-size: 15px;
+    color: rgba(246,241,228,0.78);
+    margin-bottom: 16px;
+  }
+  .layer .components {
+    display: flex; flex-wrap: wrap; gap: 8px;
+  }
+  .layer .comp {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    padding: 6px 12px;
+    background: rgba(212,168,75,0.08);
+    border: 1px solid rgba(212,168,75,0.2);
+    color: var(--paper);
+    text-transform: uppercase;
+  }
+
+  /* ---------- TRUST PILLARS ---------- */
+  .pillars {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--rule-strong);
+    border: 1px solid var(--rule-strong);
+  }
+  .pillar {
+    background: var(--ink);
+    padding: 32px 24px;
+    min-height: 220px;
+    display: flex; flex-direction: column;
+    transition: background 0.3s;
+  }
+  .pillar:hover { background: rgba(20,26,69,0.6); }
+  .pillar .p-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    margin-bottom: 16px;
+  }
+  .pillar h4 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 1.1;
+    margin-bottom: 14px;
+    min-height: 54px;
+  }
+  .pillar p {
+    font-size: 13px;
+    color: rgba(246,241,228,0.72);
+    line-height: 1.5;
+  }
+
+  /* ---------- DUAL AGENT ---------- */
+  .dual {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 40px;
+    align-items: stretch;
+  }
+  .agent-card {
+    border: 1px solid var(--rule-strong);
+    padding: 36px;
+    background: linear-gradient(180deg, rgba(20,26,69,0.5), rgba(11,16,48,0.3));
+    position: relative;
+  }
+  .agent-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 3px;
+    background: var(--gold);
+  }
+  .agent-card.cloud::before { background: var(--saffron); }
+  .agent-card .type {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 20px;
+  }
+  .agent-card.cloud .type { color: var(--saffron); }
+  .agent-card h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 40px;
+    font-weight: 500;
+    line-height: 1;
+    margin-bottom: 24px;
+  }
+  .agent-card ul {
+    list-style: none;
+  }
+  .agent-card li {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--rule);
+    font-size: 14px;
+    display: flex; gap: 12px;
+    color: rgba(246,241,228,0.82);
+  }
+  .agent-card li::before {
+    content: '→';
+    color: var(--gold);
+    font-family: 'JetBrains Mono', monospace;
+    flex-shrink: 0;
+  }
+  .sync-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 0 8px;
+  }
+  .sync-line {
+    width: 1px;
+    flex: 1;
+    background: linear-gradient(180deg, transparent, var(--gold), transparent);
+    position: relative;
+  }
+  .sync-line::before {
+    content: '';
+    position: absolute; left: -3px; top: 50%;
+    width: 7px; height: 7px;
+    background: var(--gold); border-radius: 50%;
+    box-shadow: 0 0 14px var(--gold);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+  .sync-bar .sync-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    text-transform: uppercase;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+  }
+
+  /* ---------- SITABAI JOURNEY ---------- */
+  .journey {
+    margin-top: 40px;
+    border: 1px solid var(--rule-strong);
+    padding: 48px;
+    background: linear-gradient(135deg, rgba(224,122,44,0.04), rgba(212,168,75,0.04));
+  }
+  .journey .quote {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 36px;
+    line-height: 1.2;
+    max-width: 800px;
+    margin-bottom: 16px;
+    color: var(--paper);
+  }
+  .journey .quote::before { content: '"'; color: var(--gold); }
+  .journey .quote::after { content: '"'; color: var(--gold); }
+  .journey .attribution {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 40px;
+  }
+  .journey-steps {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0;
+    margin-top: 32px;
+    position: relative;
+  }
+  .journey-steps::before {
+    content: '';
+    position: absolute;
+    top: 22px; left: 22px; right: 22px;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.4;
+  }
+  .jstep {
+    position: relative;
+    padding-right: 16px;
+  }
+  .jstep .marker {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    border: 1.5px solid var(--gold);
+    background: var(--ink);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    color: var(--gold);
+    position: relative; z-index: 2;
+    margin-bottom: 16px;
+  }
+  .jstep h5 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    line-height: 1.1;
+  }
+  .jstep p {
+    font-size: 12px;
+    color: rgba(246,241,228,0.7);
+    line-height: 1.5;
+  }
+
+  /* ---------- PILOT PHASES ---------- */
+  .phases {
+    display: flex;
+    gap: 0;
+    margin-top: 40px;
+  }
+  .phase {
+    flex: 1;
+    border: 1px solid var(--rule-strong);
+    border-right: none;
+    padding: 32px 28px;
+    position: relative;
+    transition: background 0.3s;
+  }
+  .phase:last-child { border-right: 1px solid var(--rule-strong); }
+  .phase:hover { background: rgba(212,168,75,0.04); }
+  .phase .ph-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+  .phase h4 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-weight: 500;
+    line-height: 1.1;
+    margin-bottom: 14px;
+  }
+  .phase .pop {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 14px;
+  }
+  .phase p {
+    font-size: 13px;
+    color: rgba(246,241,228,0.75);
+  }
+
+  /* ---------- RISKS ---------- */
+  .risks {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .risk-col h4 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--gold);
+    margin-bottom: 20px;
+  }
+  .risk {
+    padding: 20px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .risk:last-child { border-bottom: none; }
+  .risk h5 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    line-height: 1.15;
+  }
+  .risk .prob {
+    font-size: 13px;
+    color: rgba(246,241,228,0.7);
+    margin-bottom: 10px;
+  }
+  .risk .mit {
+    font-size: 13px;
+    color: rgba(246,241,228,0.9);
+    padding-left: 12px;
+    border-left: 2px solid var(--leaf);
+  }
+  .risk .mit::before {
+    content: 'MITIGATION · ';
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--leaf);
+  }
+
+  /* ---------- DOCS NAV ---------- */
+  .docs-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 40px;
+    border-bottom: 1px solid var(--rule-strong);
+  }
+  .doc-tab {
+    padding: 18px 28px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    border: none; background: transparent;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .doc-tab:hover { color: var(--paper); }
+  .doc-tab.active {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+  }
+
+  /* ---------- CONTRIBUTORS ---------- */
+  .contributors {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0 32px;
+  }
+  .contrib {
+    padding: 18px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .contrib .name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 500;
+  }
+  .contrib .role {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 4px;
+  }
+  .contrib.highlight .name { color: var(--gold); }
+
+  /* ---------- FOOTER ---------- */
+  footer {
+    max-width: 1400px;
+    margin: 80px auto 0;
+    padding: 60px 32px;
+    border-top: 1px solid var(--rule-strong);
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 60px;
+    position: relative;
+    z-index: 2;
+  }
+  footer h5 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 20px;
+  }
+  footer .big {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 36px;
+    font-weight: 500;
+    line-height: 1.1;
+    max-width: 460px;
+  }
+  footer ul { list-style: none; }
+  footer li { padding: 8px 0; font-size: 13px; color: rgba(246,241,228,0.75); }
+  footer a { color: var(--gold); text-decoration: none; }
+  .footer-bar {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px 32px 40px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+    display: flex; justify-content: space-between;
+    position: relative; z-index: 2;
+  }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 1024px) {
+    .rings-wrap { grid-template-columns: 1fr; }
+    .principles, .pillars { grid-template-columns: repeat(2, 1fr); }
+    .journey-steps { grid-template-columns: repeat(3, 1fr); gap: 32px 0; }
+    .journey-steps::before { display: none; }
+    .dual { grid-template-columns: 1fr; }
+    .sync-bar { flex-direction: row; padding: 16px 0; }
+    .sync-line { width: auto; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+    .sync-bar .sync-label { writing-mode: horizontal-tb; transform: none; }
+    .phases { flex-direction: column; }
+    .phase { border-right: 1px solid var(--rule-strong); border-bottom: none; }
+    .phase:last-child { border-bottom: 1px solid var(--rule-strong); }
+    .risks, .contributors { grid-template-columns: 1fr 1fr; }
+    footer { grid-template-columns: 1fr; }
+    nav.top ul { display: none; }
+  }
+  @media (max-width: 640px) {
+    .hero { padding: 80px 20px 60px; }
+    .hero .stats { grid-template-columns: 1fr 1fr; }
+    .hero .stats > div:nth-child(2) { border-right: none; }
+    section.block { padding: 60px 20px; }
+    .principles, .pillars { grid-template-columns: 1fr; }
+    .risks, .contributors { grid-template-columns: 1fr; }
+    .journey { padding: 28px 20px; }
+    .journey .quote { font-size: 24px; }
+    .layer { grid-template-columns: 1fr; gap: 12px; }
+  }
+
+  /* Reveal on scroll */
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.8s, transform 0.8s; }
+  .reveal.in { opacity: 1; transform: none; }
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <div class="inner">
+    <div class="brand"><span class="dot"></span>Agentic Kumbh</div>
+    <ul>
+      <li><a href="#vision">Vision</a></li>
+      <li><a href="#rings">Rings</a></li>
+      <li><a href="#principles">Principles</a></li>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#trust">Trust</a></li>
+      <li><a href="#dual">Agents</a></li>
+      <li><a href="#pilot">Pilot</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="meta">WHITE PAPER VISUALIZER · NASHIK KUMBH 2027 · PROJECT NANDA</div>
+  <h1>Every pilgrim,<br/>an <em>envoy</em>.<br/>Every citizen,<br/>an <em>agent</em>.</h1>
+  <p class="lede">
+    A unified reading of two linked proposals — <strong>KumbhDoot</strong>, a personal AI agent for every pilgrim at Nashik Simhastha 2027, and <strong>Doot / Agent One</strong>, the national architecture extending India's DPI from transactional rails to an agentic trust stack.
+  </p>
+
+  <div class="stats">
+    <div>
+      <div class="n">45</div>
+      <div class="l">Days of pilgrimage</div>
+    </div>
+    <div>
+      <div class="n">10M+</div>
+      <div class="l">Peak day pilgrims</div>
+    </div>
+    <div>
+      <div class="n">22</div>
+      <div class="l">Scheduled languages</div>
+    </div>
+    <div>
+      <div class="n">10K</div>
+      <div class="l">Pilot participants</div>
+    </div>
+  </div>
+</header>
+
+<!-- VISION -->
+<section class="block" id="vision">
+  <div class="section-label">§01 · THE VISION</div>
+  <h2 class="section-title">A Kumbh that works<br/>for <em>everyone</em>.</h2>
+  <p class="section-intro">
+    Not a futuristic fantasy. A deliverable framework for 2027 built on proven rails — India Stack, Bhashini, sovereign cloud — grounded in cultural sensitivity and committed to privacy, dignity and inclusion.
+  </p>
+
+  <div class="journey">
+    <p class="quote">Mujhe toh Nasik jana hai Kumbh Mela ke liye. Main kya karu?</p>
+    <div class="attribution">SITABAI · 70 · PATNA · PRE-DIABETIC · LOW DIGITAL LITERACY</div>
+
+    <div class="journey-steps">
+      <div class="jstep">
+        <div class="marker">1</div>
+        <h5>Understand</h5>
+        <p>Voice intent parsed in Hindi. Language, entities and needs extracted on-device.</p>
+      </div>
+      <div class="jstep">
+        <div class="marker">2</div>
+        <h5>Discover</h5>
+        <p>Scheme matching, provider search, eligibility check across transport &amp; housing.</p>
+      </div>
+      <div class="jstep">
+        <div class="marker">3</div>
+        <h5>Verify</h5>
+        <p>Senior claim proved via DigiLocker — no Aadhaar number disclosed. Scope &amp; time bound.</p>
+      </div>
+      <div class="jstep">
+        <div class="marker">4</div>
+        <h5>Execute</h5>
+        <p>Train booked, ₹450 homestay paid via UPI, medical camp registered, care circle linked.</p>
+      </div>
+      <div class="jstep">
+        <div class="marker">5</div>
+        <h5>Confirm</h5>
+        <p>Human-in-the-loop — agent summarises itinerary in Hindi and waits for voice approval.</p>
+      </div>
+      <div class="jstep">
+        <div class="marker">6</div>
+        <h5>Audit</h5>
+        <p>Tamper-evident log written. Dispute path armed. Consent revocable any time.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RINGS -->
+<section class="block" id="rings">
+  <div class="section-label">§02 · FOUR RINGS OF INNOVATION</div>
+  <h2 class="section-title">Coordination, not <em>control</em>.</h2>
+  <p class="section-intro">
+    The Kumbh governance challenge sits in concentric rings. Infrastructure and crowd safety remain with existing protocols. The agentic layer solves the middle rings — access and experience — where the work is coordination, consent and multi-stakeholder orchestration. Click a ring to explore.
+  </p>
+
+  <div class="rings-wrap">
+    <div class="rings-svg-wrap">
+      <svg class="rings-svg" viewBox="0 0 600 600">
+        <defs>
+          <radialGradient id="core" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#f2c45a" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#0b1030" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <circle cx="300" cy="300" r="280" class="ring-fill" data-ring="4"/>
+        <circle cx="300" cy="300" r="210" class="ring-fill" data-ring="3"/>
+        <circle cx="300" cy="300" r="140" class="ring-fill" data-ring="2"/>
+        <circle cx="300" cy="300" r="70" class="ring-fill" data-ring="1"/>
+
+        <circle cx="300" cy="300" r="280" class="ring-circle" data-ring="4"/>
+        <circle cx="300" cy="300" r="210" class="ring-circle" data-ring="3"/>
+        <circle cx="300" cy="300" r="140" class="ring-circle" data-ring="2"/>
+        <circle cx="300" cy="300" r="70" class="ring-circle" data-ring="1"/>
+
+        <circle cx="300" cy="300" r="40" fill="url(#core)"/>
+        <text x="300" y="303" text-anchor="middle" class="ring-label" style="font-size:11px;">INFRA</text>
+        <text x="300" y="175" text-anchor="middle" class="ring-label">ACCESS</text>
+        <text x="300" y="105" text-anchor="middle" class="ring-label">EXPERIENCE</text>
+        <text x="300" y="35" text-anchor="middle" class="ring-label">OUTREACH</text>
+      </svg>
+    </div>
+
+    <div class="ring-detail" id="ring-detail">
+      <!-- filled by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- PRINCIPLES -->
+<section class="block" id="principles">
+  <div class="section-label">§03 · THREE CORE PRINCIPLES</div>
+  <h2 class="section-title">One pilgrim,<br/>one <em>agent</em>.</h2>
+
+  <div class="principles">
+    <div class="principle">
+      <div class="num">i</div>
+      <div class="role">PILGRIM LAYER</div>
+      <h3>Kumbh Doot</h3>
+      <p>A personal, voice-first AI envoy. Runs locally on phone, feature phone, or voice-only via IVR. Multilingual across 20+ Indian languages, low-literacy tolerant, offline-capable. Encrypted personal data stays on-device; a secure cloud replica handles complex reasoning and recovery.</p>
+    </div>
+    <div class="principle">
+      <div class="num">ii</div>
+      <div class="role">CIVIC &amp; COMMERCIAL LAYER</div>
+      <h3>Coordinated<br/>counterparties</h3>
+      <p>Government departments, transport, health, police, camps and local vendors operate coordinated agents connected to existing databases via MCP. They negotiate on behalf of principals — no heavy LLM cost, no central command-and-control.</p>
+    </div>
+    <div class="principle">
+      <div class="num">iii</div>
+      <div class="role">SOVEREIGN PLATFORM</div>
+      <h3>India Stack 2.0</h3>
+      <p>Extends DPI from transactional (Aadhaar, UPI, DigiLocker, ABDM) to an <em>agentic</em> trust layer. Consent-driven, DEPA-compliant. No central citizen database. Identity verified, never pooled.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section class="block" id="architecture">
+  <div class="section-label">§04 · TECHNICAL ARCHITECTURE</div>
+  <h2 class="section-title">Four layers,<br/>population <em>scale</em>.</h2>
+  <p class="section-intro">
+    A stack designed to support 10M peak pilgrims, 25M registered agents and 50k messages per second — while degrading gracefully rather than failing catastrophically.
+  </p>
+
+  <div class="arch">
+    <div class="layer">
+      <div>
+        <div class="lnum">LAYER 01</div>
+        <div class="lname">Edge Agent<br/>Layer</div>
+      </div>
+      <div>
+        <div class="ldesc">Citizen-facing. Personal AI on smartphone, feature phone, or voice-only IVR. Bhashini-powered voice interface. Sensitive data encrypted on-device. Secure cloud replica for cross-device continuity.</div>
+        <div class="components">
+          <span class="comp">ON-DEVICE LLM</span>
+          <span class="comp">BHASHINI STT/TTS</span>
+          <span class="comp">AES-256 VAULT</span>
+          <span class="comp">CLOUD SYNC</span>
+          <span class="comp">22+ LANGUAGES</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="layer">
+      <div>
+        <div class="lnum">LAYER 02</div>
+        <div class="lname">Ecosystem<br/>Integration</div>
+      </div>
+      <div>
+        <div class="ldesc">Civic, state-camp and commercial agents coordinate through a federated Agent Discovery Service. JSON-LD messaging. Integrates ONDC, ABDM, Account Aggregators, UPI, IRCTC and DigiLocker.</div>
+        <div class="components">
+          <span class="comp">AGENT REGISTRY</span>
+          <span class="comp">ONDC</span>
+          <span class="comp">ABDM</span>
+          <span class="comp">UPI</span>
+          <span class="comp">IRCTC APIs</span>
+          <span class="comp">DIGILOCKER</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="layer">
+      <div>
+        <div class="lnum">LAYER 03</div>
+        <div class="lname">Sovereign<br/>Agent Platform</div>
+      </div>
+      <div>
+        <div class="ldesc">Identity and consent management via Aadhaar and DEPA. Federated agent registry with reputation tracking. Policy engine, role-based access and emergency overrides. Federated learning for privacy-preserving analytics.</div>
+        <div class="components">
+          <span class="comp">IDENTITY &amp; CONSENT</span>
+          <span class="comp">POLICY ENGINE</span>
+          <span class="comp">AUDIT &amp; ANALYTICS</span>
+          <span class="comp">KAFKA PIPELINES</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="layer">
+      <div>
+        <div class="lnum">LAYER 04</div>
+        <div class="lname">Sovereign<br/>Cloud</div>
+      </div>
+      <div>
+        <div class="ldesc">MeitY-empanelled clouds with India data residency across Mumbai, Delhi and Bangalore. Multi-region replication. 99.99% uptime target. Cross-region failover under five minutes.</div>
+        <div class="components">
+          <span class="comp">POSTGRESQL</span>
+          <span class="comp">MONGODB</span>
+          <span class="comp">INFLUXDB</span>
+          <span class="comp">SNOWFLAKE</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST -->
+<section class="block" id="trust">
+  <div class="section-label">§05 · TRUST INFRASTRUCTURE</div>
+  <h2 class="section-title">Delegated authority,<br/><em>enforced</em> by code.</h2>
+  <p class="section-intro">
+    The agent holds no intrinsic power. All authority flows from the citizen, is constrained by law, and enforced by technology. Seven pillars define the boundary.
+  </p>
+
+  <div class="pillars">
+    <div class="pillar">
+      <div class="p-num">01 / IDENTITY</div>
+      <h4>Identity-bound<br/>Delegation</h4>
+      <p>Each agent is cryptographically bound to the citizen's digital identity. Every action presents a verifiable claim: Agent A, for Citizen C, for Purpose P, under Scope S.</p>
+    </div>
+    <div class="pillar">
+      <div class="p-num">02 / CONSENT</div>
+      <h4>Least<br/>Privilege</h4>
+      <p>Fine-grained, revocable consent. Permissions are purpose-specific, time-limited and capability-scoped. No residual access after revocation.</p>
+    </div>
+    <div class="pillar">
+      <div class="p-num">03 / TOOLS</div>
+      <h4>Secure Tool<br/>Execution</h4>
+      <p>The model proposes; only policy-compliant tools execute. All network calls, forms, payments and retrievals pass through a validated tool layer. External input is hostile by default.</p>
+    </div>
+    <div class="pillar">
+      <div class="p-num">04 / HITL</div>
+      <h4>Human in the<br/>Loop</h4>
+      <p>Financial transfers, legally binding documents, identity changes and third-party sharing require explicit confirmation — biometric, PIN or crypto signature — before authorization.</p>
+    </div>
+    <div class="pillar">
+      <div class="p-num">05 / POLICY</div>
+      <h4>Policy-bound<br/>Reasoning</h4>
+      <p>A machine-readable policy layer encodes law, financial limits and data-protection rules. Even if the model proposes an unsafe plan, the engine prevents execution.</p>
+    </div>
+    <div class="pillar">
+      <div class="p-num">06 / PRIVACY</div>
+      <h4>On-device &amp;<br/>TEE</h4>
+      <p>Agents run on-device or inside Trusted Execution Environments. Memory, inputs and reasoning state are encrypted in use — inaccessible even to infrastructure operators. Verifiable via remote attestation.</p>
+    </div>
+    <div class="pillar">
+      <div class="p-num">07 / AUDIT</div>
+      <h4>Tamper-evident<br/>Forensics</h4>
+      <p>Every data access, tool invocation and transaction is written to tamper-evident logs — visible to the citizen, accessible to regulators where legally required. Dispute resolution has evidence by default.</p>
+    </div>
+    <div class="pillar">
+      <div class="p-num">∴ / DEFAULTS</div>
+      <h4>Defaults as<br/>Governance</h4>
+      <p>At population scale, factory settings are the policy. Privacy-by-design ships with no data-sharing default-on. The vulnerable are protected by architecture, not by their ability to configure.</p>
+    </div>
+  </div>
+</section>
+
+<!-- DUAL AGENT -->
+<section class="block" id="dual">
+  <div class="section-label">§06 · DUAL AGENT FRAMEWORK</div>
+  <h2 class="section-title">Edge-first,<br/>cloud when <em>necessary</em>.</h2>
+  <p class="section-intro">
+    Two synchronised agents. Sensitive data stays local. The cloud handles what the edge cannot. At population scale, edge-first is the only sustainable path — intelligence scales with devices already in citizens' hands.
+  </p>
+
+  <div class="dual">
+    <div class="agent-card">
+      <div class="type">PRIMARY · ON-DEVICE · NPU</div>
+      <h3>Phone Agent</h3>
+      <ul>
+        <li>Local LLM inference on-device chips</li>
+        <li>Personal data never leaves the phone</li>
+        <li>Full offline capability for core flows</li>
+        <li>Voice interaction &amp; conversation history</li>
+        <li>Lightweight on-device personalisation</li>
+        <li>Degrades gracefully without connectivity</li>
+      </ul>
+    </div>
+
+    <div class="sync-bar">
+      <div class="sync-line"></div>
+      <div class="sync-label">E2E ENCRYPTED SYNC</div>
+      <div class="sync-line"></div>
+    </div>
+
+    <div class="agent-card cloud">
+      <div class="type">OPTIONAL · TEE · SOVEREIGN CLOUD</div>
+      <h3>Cloud Replica</h3>
+      <ul>
+        <li>Complex reasoning &amp; multi-agent coordination</li>
+        <li>Runs inside Trusted Execution Environments</li>
+        <li>Remote attestation — verify approved code</li>
+        <li>Cross-device continuity via DigiLocker</li>
+        <li>Multi-provider model — sovereign + private</li>
+        <li>Falls back to edge-only on attestation failure</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- PILOT -->
+<section class="block" id="pilot">
+  <div class="section-label">§07 · PILOT STRATEGY</div>
+  <h2 class="section-title">From 10,000<br/>to <em>10 million</em>.</h2>
+  <p class="section-intro">
+    A phased rollout from controlled research through a 10,000-person Nashik college pilot to the Kumbh Mela 2027 as the ultimate stress test — multi-jurisdictional, multi-lingual, multi-sector and time-bound.
+  </p>
+
+  <div class="phases">
+    <div class="phase">
+      <div class="ph-num">Phase 0</div>
+      <h4>Research<br/>Pilot</h4>
+      <div class="pop">AI RESEARCHERS · GOV TECH</div>
+      <p>Validate trust boundary, consent UX, observability and contract stack in controlled conditions.</p>
+    </div>
+    <div class="phase">
+      <div class="ph-num">Phase 1</div>
+      <h4>Narrow<br/>Cohort</h4>
+      <div class="pop">10,000 · NASHIK COLLEGES</div>
+      <p>Voice registration in 5+ languages, agent-to-agent booking, UPI flows, SOS workflow, DigiLocker verification.</p>
+    </div>
+    <div class="phase">
+      <div class="ph-num">Phase 2</div>
+      <h4>City-scale<br/>Sandbox</h4>
+      <div class="pop">DISTRICT / CITY</div>
+      <p>Agent interactions with real services at scale. Measure adoption, confidence scaffolding and deepfake resilience.</p>
+    </div>
+    <div class="phase">
+      <div class="ph-num">Phase 3</div>
+      <h4>Kumbh<br/>Stress Test</h4>
+      <div class="pop">10M+ PILGRIMS · 45 DAYS</div>
+      <p>90%+ task completion. &lt;10% human escalation. Zero privacy breaches. 95%+ satisfaction. 50%+ cost reduction.</p>
+    </div>
+  </div>
+</section>
+
+<!-- RISKS -->
+<section class="block">
+  <div class="section-label">§08 · RISKS &amp; MITIGATIONS</div>
+  <h2 class="section-title">Honest about<br/>what can <em>break</em>.</h2>
+
+  <div class="risks">
+    <div class="risk-col">
+      <h4>Technical</h4>
+      <div class="risk">
+        <h5>Connectivity at scale</h5>
+        <div class="prob">Mobile networks may not support 10M concurrent users on peak snan days.</div>
+        <div class="mit">Telecom pre-coordination for temporary towers; IVR/USSD low-bandwidth fallbacks; edge voice models reduce round-trips.</div>
+      </div>
+      <div class="risk">
+        <h5>Low-resource languages</h5>
+        <div class="prob">Voice accuracy in Bhojpuri, Maithili or other dialects lags Hindi/English.</div>
+        <div class="mit">Dialect-specific fine-tuning on Bhashini datasets; human fallback operators; per-language error monitoring during pilot.</div>
+      </div>
+    </div>
+
+    <div class="risk-col">
+      <h4>Adoption</h4>
+      <div class="risk">
+        <h5>Pilgrim trust &amp; uptake</h5>
+        <div class="prob">Many pilgrims may be skeptical of AI agents or unwilling to register.</div>
+        <div class="mit">Registration entirely voluntary; unregistered pilgrims retain full access; community leaders and state-camp volunteers as onboarding ambassadors.</div>
+      </div>
+      <div class="risk">
+        <h5>Vendor participation</h5>
+        <div class="prob">Small vendors may lack capability or willingness to integrate.</div>
+        <div class="mit">Lightweight integration via existing UPI; voice-based vendor registration; incentive programs for early adopters.</div>
+      </div>
+    </div>
+
+    <div class="risk-col">
+      <h4>Governance</h4>
+      <div class="risk">
+        <h5>Agent liability</h5>
+        <div class="prob">If an agent provides incorrect medical guidance or routes a pilgrim into danger, who is responsible?</div>
+        <div class="mit">Agents provide recommendations not directives; medical/emergency routing validated against curated gov sources, not open LLM output; full audit trails.</div>
+      </div>
+      <div class="risk">
+        <h5>Political &amp; cultural</h5>
+        <div class="prob">Risk of appearing to gatekeep a traditionally open religious gathering.</div>
+        <div class="mit">Kumbh Pass framed as optional enabler, not requirement; terminology avoids "visa" framing; unregistered pilgrims retain full physical access.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTRIBUTORS -->
+<section class="block">
+  <div class="section-label">§09 · CONTRIBUTORS</div>
+  <h2 class="section-title">A coalition of<br/>state, academy &amp; <em>builders</em>.</h2>
+
+  <div class="docs-tabs">
+    <button class="doc-tab active" data-tab="kumbh">KumbhDoot Proposal</button>
+    <button class="doc-tab" data-tab="doot">Doot / Agent One White Paper</button>
+  </div>
+
+  <div id="tab-kumbh" class="tab-panel">
+    <div class="contributors">
+      <div class="contrib"><div class="name">Kaustubh Dhavse</div><div class="role">Chief Advisor to CM, Maharashtra</div></div>
+      <div class="contrib"><div class="name">Dr. Praveen Gedam, IAS</div><div class="role">Divisional Commissioner, Nashik</div></div>
+      <div class="contrib"><div class="name">Shekhar Singh</div><div class="role">Commissioner, Kumbh Mela Nashik</div></div>
+      <div class="contrib"><div class="name">Dr. Ramesh Raskar</div><div class="role">MIT · Project NANDA</div></div>
+      <div class="contrib"><div class="name">Dr. Rekha Singhal</div><div class="role">Tata Consultancy Services</div></div>
+      <div class="contrib"><div class="name">Mahesh Lambe</div><div class="role">Project NANDA</div></div>
+      <div class="contrib"><div class="name">Saurabh Sakalkar</div><div class="role">Project NANDA</div></div>
+      <div class="contrib highlight"><div class="name">Ankur Shinde</div><div class="role">Project NANDA</div></div>
+      <div class="contrib"><div class="name">Gurusha Raskar</div><div class="role">Project NANDA</div></div>
+    </div>
+  </div>
+
+  <div id="tab-doot" class="tab-panel" style="display:none;">
+    <div class="contributors">
+      <div class="contrib"><div class="name">Ramesh Raskar</div><div class="role">MIT Media Lab</div></div>
+      <div class="contrib"><div class="name">Srikanth Nadhamuni</div><div class="role">Founding CTO, Aadhaar</div></div>
+      <div class="contrib"><div class="name">Nitin Saxena</div><div class="role">IIT Kanpur</div></div>
+      <div class="contrib"><div class="name">Kapil Vaswani</div><div class="role">SPARC</div></div>
+      <div class="contrib"><div class="name">Biplab Pal</div><div class="role">University of Maryland</div></div>
+      <div class="contrib"><div class="name">Umakant Soni</div><div class="role">AI Foundry</div></div>
+      <div class="contrib"><div class="name">Utkarsh</div><div class="role">Xmplify.tech</div></div>
+      <div class="contrib"><div class="name">Vijaya Kumar Ivaturi</div><div class="role">Crayon Data</div></div>
+      <div class="contrib"><div class="name">Manudev Jain</div><div class="role">Indian Revenue Services</div></div>
+      <div class="contrib"><div class="name">Sujith Nair</div><div class="role">Beckn Protocol</div></div>
+      <div class="contrib"><div class="name">Ujjwal Kumar</div><div class="role">Quantum Alliance</div></div>
+      <div class="contrib"><div class="name">Chris Pease</div><div class="role">Project NANDA</div></div>
+      <div class="contrib"><div class="name">Lipika Kapoor</div><div class="role">NABU Sciences</div></div>
+      <div class="contrib"><div class="name">Aditya Sharma</div><div class="role">Project NANDA</div></div>
+      <div class="contrib"><div class="name">Himanshu Tyagi</div><div class="role">Indian Institute of Science</div></div>
+      <div class="contrib"><div class="name">Praveen Gedam, IAS</div><div class="role">Nashik–Trimbakeshwar Kumbh Mela Authority</div></div>
+      <div class="contrib"><div class="name">Shekhar Singh</div><div class="role">Commissioner, Kumbh Mela Nashik</div></div>
+      <div class="contrib"><div class="name">Santanu Bhattacharya</div><div class="role">Researcher, MIT Media Lab</div></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div>
+    <h5>Final Thought</h5>
+    <p class="big serif">The agent is not the destination. It is the path — the Kumbh Doot, the envoy, the guide.</p>
+  </div>
+  <div>
+    <h5>KumbhDoot</h5>
+    <ul>
+      <li><a href="https://kumbhdoot.org/" target="_blank">kumbhdoot.org</a></li>
+      <li><a href="https://kumbhdoot.com/" target="_blank">kumbhdoot.com</a></li>
+    </ul>
+  </div>
+  <div>
+    <h5>Research &amp; Standards</h5>
+    <ul>
+      <li><a href="https://projectnanda.org" target="_blank">projectnanda.org</a></li>
+      <li><a href="https://DigiDoot.in" target="_blank">DigiDoot.in</a></li>
+    </ul>
+  </div>
+</footer>
+
+<div class="footer-bar">
+  <span>SYNTHESIZED FROM 2 SOURCE DOCUMENTS · KUMBHDOOT PROPOSAL + DOOT WHITE PAPER</span>
+  <span>VISUALIZER · v1.0</span>
+</div>
+
+<script>
+  // Ring interactivity
+  const ringData = {
+    '1': {
+      tag: 'RING 01 · OUT OF SCOPE',
+      title: 'Infrastructure<br/>&amp; Safety',
+      desc: 'Crowd management, physical safety, CCTV, sanitation. Handled by existing security and civil engineering protocols. The agentic layer interfaces through anonymised aggregate demand signals and emergency dispatch — never through direct control.',
+      chips: [
+        ['Crowd density', 'out'],
+        ['CCTV', 'out'],
+        ['Sanitation', 'out'],
+        ['Connectivity', 'out'],
+        ['SOS interface', '']
+      ]
+    },
+    '2': {
+      tag: 'RING 02 · ACCESS · MAIN FOCUS',
+      title: 'Access<br/>&amp; Citizen Services',
+      desc: 'The coordination layer. A $2B Kumbh economy mostly sits in the unorganised sector — severe discovery and quality gaps. Consent-driven pre-registration as a Kumbh Pass. Agent-to-agent coordination for housing, transport, food and vendor discovery.',
+      chips: [
+        ['Registration', ''],
+        ['Kumbh Pass', ''],
+        ['Housing', ''],
+        ['Transport', ''],
+        ['Healthcare', ''],
+        ['Food', ''],
+        ['Navigation', '']
+      ]
+    },
+    '3': {
+      tag: 'RING 03 · EXPERIENCE · MAIN FOCUS',
+      title: 'Experience<br/>&amp; Meaning',
+      desc: 'From survivable event to meaningful pilgrimage. Voice-activated UPI, micro-payments, transparent donations, cross-state settlement. Real-time translation for directions, medical consults and spiritual guidance. Auto-formed social circles by language or state.',
+      chips: [
+        ['Voice UPI', ''],
+        ['Language', ''],
+        ['Tele-puja', ''],
+        ['AR / VR', ''],
+        ['Social circles', ''],
+        ['Donations', '']
+      ]
+    },
+    '4': {
+      tag: 'RING 04 · FUTURE SCOPE',
+      title: 'Outreach<br/>&amp; Innovation',
+      desc: 'Health screening, art and cultural exhibitions, product demonstrations, expo pavilions and broadcast rights. Natural extensions that build on the agentic infrastructure established in the middle rings.',
+      chips: [
+        ['Health screening', ''],
+        ['Cultural expo', ''],
+        ['Broadcast', ''],
+        ['Product demos', '']
+      ]
+    }
+  };
+
+  const detail = document.getElementById('ring-detail');
+  function renderRing(n) {
+    const d = ringData[n];
+    detail.innerHTML = `
+      <div class="tag">${d.tag}</div>
+      <h3>${d.title}</h3>
+      <p>${d.desc}</p>
+      <div class="chips">
+        ${d.chips.map(c => `<span class="chip ${c[1]}">${c[0]}</span>`).join('')}
+      </div>
+    `;
+    document.querySelectorAll('.ring-circle, .ring-fill').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll(`[data-ring="${n}"]`).forEach(el => el.classList.add('active'));
+  }
+  renderRing('2');
+
+  document.querySelectorAll('.ring-circle, .ring-fill').forEach(el => {
+    el.addEventListener('click', () => renderRing(el.getAttribute('data-ring')));
+    el.addEventListener('mouseenter', () => renderRing(el.getAttribute('data-ring')));
+  });
+
+  // Doc tabs
+  document.querySelectorAll('.doc-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.doc-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const target = btn.dataset.tab;
+      document.getElementById('tab-kumbh').style.display = target === 'kumbh' ? 'block' : 'none';
+      document.getElementById('tab-doot').style.display = target === 'doot' ? 'block' : 'none';
+    });
+  });
+
+  // Reveal on scroll
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('section.block').forEach(s => {
+    s.classList.add('reveal');
+    io.observe(s);
+  });
+</script>
+
+</body>
+</html>
